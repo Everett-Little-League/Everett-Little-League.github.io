@@ -1,0 +1,73 @@
+{
+    "date": "2025-03-06",
+    "times": [
+        {
+            "time": "10:00 AM",
+            "snackshacks": [
+                {
+                    "name": "Madison",
+                    "status": "Grill open",
+                    "volunteers": "3/4",
+                    "signup": "https://signup.com/1234567890"
+                },
+                {
+                    "name": "Garfield",
+                    "status": "Limited",
+                    "volunteers": "1/4",
+                    "signup": "https://signup.com/1234567890"
+                }
+            ]
+        },
+        {
+            "time": "12:00 PM",
+            "snackshacks": [
+                {
+                    "name": "Madison",
+                    "status": "Grill open",
+                    "volunteers": "3/4",
+                    "signup": "https://signup.com/1234567890"
+                },
+                {
+                    "name": "Garfield",
+                    "status": "Limited",
+                    "volunteers": "1/4",
+                    "signup": "https://signup.com/1234567890"
+                }
+            ]
+        },
+        {
+            "time": "2:00 PM",
+            "snackshacks": [
+                {
+                    "name": "Madison",
+                    "status": "Closed",
+                    "volunteers": "0/4",
+                    "signup": "https://signup.com/1234567890"
+                },
+                {
+                    "name": "Garfield",
+                    "status": "Limited",
+                    "volunteers": "1/4",
+                    "signup": "https://signup.com/1234567890"
+                }
+            ]
+        },
+        {
+            "time": "4:00 PM",
+            "snackshacks": [
+                {
+                    "name": "Madison",
+                    "status": "Fully Open",
+                    "volunteers": "4/4",
+                    "signup": "https://signup.com/1234567890"
+                },
+                {
+                    "name": "Garfield",
+                    "status": "Limited",
+                    "volunteers": "1/4",
+                    "signup": "https://signup.com/1234567890"
+                }
+            ]
+        }
+    ]
+}

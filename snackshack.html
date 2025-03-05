@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snack Shack Banner - Everett Little League</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .banner {
+            width: 100%;
+            background-color: #0066cc;
+            background-image: linear-gradient(to right, #0055b3, #0077e6);
+            color: white;
+            padding: 8px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .banner-content {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            padding: 0 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .banner-date {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            width: 100%;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .time-column {
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+            max-width: 200px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .time-heading {
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 4px 8px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .snackshack-container {
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .snackshack-info {
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 6px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+        .snackshack-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 0.95em;
+        }
+        .snackshack-status, .snackshack-volunteers {
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signup-btn {
+            background-color: #ff9900;
+            background-image: linear-gradient(to bottom, #ffaa33, #ff8800);
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85em;
+            text-align: center;
+            margin-top: 3px;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        }
+        .signup-btn:hover {
+            background-image: linear-gradient(to bottom, #ffb84d, #ff9900);
+        }
+        .status-limited {
+            color: #ffcc00;
+        }
+        .status-open {
+            color: #99ff99;
+        }
+        .status-closed {
+            color: #ff9999;
+        }
+        .volunteers-needed {
+            color: #ff9999;
+        }
+        .volunteers-good {
+            color: #99ff99;
+        }
+        .label {
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .value {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <div class="banner-content" id="banner-content">
+            <!-- Banner content will be populated by JavaScript -->
+            <div class="banner-loading">Loading snack shack information...</div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch and display snack shack information
+        async function loadSnackShackInfo() {
+            try {
+                const response = await fetch('data/snackshack.json');
+                const data = await response.json();
+                
+                // Update banner with all times
+                updateBanner(data);
+            } catch (error) {
+                console.error('Error loading snack shack information:', error);
+                document.getElementById('banner-content').innerHTML = 
+                    '<div class="banner-error">Error loading snack shack information. Please try again later.</div>';
+            }
+        }
+
+        // Function to update the banner with all time slots
+        function updateBanner(data) {
+            const bannerContent = document.getElementById('banner-content');
+            
+            // Get the date
+            const date = new Date(data.date);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Start with the date
+            let bannerHTML = `<div class="banner-date">${formattedDate}</div>`;
+            
+            // Add all time slots as vertical columns
+            if (data.times && data.times.length > 0) {
+                // Sort times chronologically if needed
+                data.times.sort((a, b) => {
+                    return new Date('1970/01/01 ' + a.time) - new Date('1970/01/01 ' + b.time);
+                });
+                
+                data.times.forEach(timeSlot => {
+                    bannerHTML += `<div class="time-column">
+                        <div class="time-heading">${timeSlot.time}</div>
+                        <div class="snackshack-container">`;
+                    
+                    timeSlot.snackshacks.forEach(shack => {
+                        const volunteersParts = shack.volunteers.split('/');
+                        const volunteersClass = parseInt(volunteersParts[0]) < parseInt(volunteersParts[1]) 
+                            ? 'volunteers-needed' 
+                            : 'volunteers-good';
+                        
+                        let statusClass = 'status-limited';
+                        if (shack.status.toLowerCase().includes('open')) {
+                            statusClass = 'status-open';
+                        } else if (shack.status.toLowerCase().includes('closed')) {
+                            statusClass = 'status-closed';
+                        }
+                        
+                        bannerHTML += `
+                            <div class="snackshack-info">
+                                <div class="snackshack-name">${shack.name}</div>
+                                <div class="snackshack-status">
+                                    <span class="label">Status:</span>
+                                    <span class="value ${statusClass}">${shack.status}</span>
+                                </div>
+                                <div class="snackshack-volunteers">
+                                    <span class="label">Volunteers:</span>
+                                    <span class="value ${volunteersClass}">${shack.volunteers}</span>
+                                </div>
+                                <a href="${shack.signup}" target="_blank" class="signup-btn">Sign Up</a>
+                            </div>
+                        `;
+                    });
+                    
+                    bannerHTML += `</div></div>`;
+                });
+            } else {
+                bannerHTML += '<div>No schedule information available.</div>';
+            }
+            
+            bannerContent.innerHTML = bannerHTML;
+        }
+
+        // Load snack shack information when the page loads
+        document.addEventListener('DOMContentLoaded', loadSnackShackInfo);
+    </script>
+</body>
+</html>
