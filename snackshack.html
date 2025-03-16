@@ -157,20 +157,39 @@
         function updateBanner(data) {
             const bannerContent = document.getElementById('banner-content');
             
-            // Get the date
-            const date = new Date(data.date);
-            const formattedDate = date.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
+            // Get the date directly from the data
+            const dateStr = data.date;
+            
+            // Format the date string directly without using Date object
+            // This assumes data.date is in a format like "2023-03-24"
+            let formattedDate;
+            
+            // If data.formattedDate exists, use it directly
+            if (data.formattedDate) {
+                formattedDate = data.formattedDate;
+            } else {
+                // Otherwise, manually format the date from the date string
+                const months = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+                const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                
+                // Parse the date parts (assuming YYYY-MM-DD format)
+                const [year, month, day] = dateStr.split('-').map(num => parseInt(num, 10));
+                
+                // Create a date object (using noon to avoid timezone issues)
+                const date = new Date(year, month - 1, day, 12, 0, 0);
+                
+                // Format the date
+                formattedDate = `${days[date.getDay()]}, ${months[month - 1]} ${day}, ${year}`;
+            }
             
             // Check if the date is today
             const today = new Date();
-            const isToday = date.getDate() === today.getDate() && 
-                           date.getMonth() === today.getMonth() && 
-                           date.getFullYear() === today.getFullYear();
+            const isToday = today.getFullYear() === parseInt(dateStr.split('-')[0]) &&
+                           (today.getMonth() + 1) === parseInt(dateStr.split('-')[1]) &&
+                           today.getDate() === parseInt(dateStr.split('-')[2]);
             
             // Start with the date, adding "Next Open:" if not today
             let bannerHTML = `<div class="banner-date">`;
