@@ -165,9 +165,14 @@
             
             // Add all time slots as vertical columns
             if (data.times && data.times.length > 0) {
-                // Sort times chronologically if needed
+                // Sort times chronologically by start time
                 data.times.sort((a, b) => {
-                    return new Date('1970/01/01 ' + a.time) - new Date('1970/01/01 ' + b.time);
+                    // Extract start time (everything before the dash)
+                    const aStartTime = a.time.split('-')[0].trim();
+                    const bStartTime = b.time.split('-')[0].trim();
+                    
+                    // Compare start times
+                    return new Date('1970/01/01 ' + aStartTime) - new Date('1970/01/01 ' + bStartTime);
                 });
                 
                 data.times.forEach(timeSlot => {
