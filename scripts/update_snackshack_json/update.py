@@ -91,7 +91,7 @@ def get_signupgenius_data():
 def determine_status(volunteer_count, max_volunteers):
     """Determine the status based on volunteer count."""
     if volunteer_count == 0:
-        return "Closed"
+        return "Need Volunteers"
     # If the volunteer count is at least max_volunteers, the grill is fully open
     elif volunteer_count >= max_volunteers:
         return "Fully Open"
