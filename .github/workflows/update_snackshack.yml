@@ -1,4 +1,4 @@
- name: Update Snack Shack JSON
+name: Update Snack Shack JSON
 
 on:
   schedule:
