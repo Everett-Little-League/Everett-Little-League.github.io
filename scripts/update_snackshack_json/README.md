@@ -12,7 +12,7 @@ This script updates the `data/snackshack.json` file with data from SignUpGenius.
 
 2. Install dependencies:
    ```bash
-   pip install -r requirements.pip
+   pip install -r requirements.txt
    ```
 
 3. Create a `.env` file with your SignUpGenius credentials:

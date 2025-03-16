@@ -18,7 +18,7 @@ source venv/bin/activate
 
 # Install or update dependencies
 echo "Installing dependencies..."
-pip install -r requirements.pip
+pip install -r requirements.txt
 
 # Check if .env file exists
 if [ ! -f ".env" ]; then
