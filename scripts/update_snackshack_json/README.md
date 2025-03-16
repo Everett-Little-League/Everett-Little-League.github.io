@@ -125,7 +125,7 @@ The script maintains the following JSON structure:
 ## Status Determination
 
 The status of each snack shack is determined by the number of volunteers:
-- "Closed" - 0 volunteers
+- "Need Volunteers" - 0 volunteers
 - "Limited" - 1-2 volunteers (half or less capacity)
 - "Grill open" - 3 volunteers (more than half capacity)
 - "Fully Open" - 4 volunteers (full capacity)
