@@ -1,0 +1,49 @@
+ name: Update Snack Shack JSON
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  update-snackshack:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/update_snackshack_json/requirements.pip
+      
+      - name: Run update script
+        env:
+          SIGNUP_ID: ${{ secrets.SIGNUPGENIUS_SIGNUP_ID }}
+          API_KEY: ${{ secrets.SIGNUPGENIUS_API_KEY }}
+        run: |
+          cd scripts/update_snackshack_json
+          python update.py
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet data/snackshack.json || echo "changes=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push if changed
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/snackshack.json
+          git commit -m "Update snackshack.json [skip ci]"
+          git push
