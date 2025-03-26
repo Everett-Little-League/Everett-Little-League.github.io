@@ -36,6 +36,9 @@ BASE_URL = "https://api.signupgenius.com/v2/k"  # Removed trailing slash
 REPORT_ENDPOINT = f"/signups/report/all/{SIGNUP_ID}/"
 API_DOCS = "https://developer.signupgenius.com/developer/keybaseddocs"
 
+# The Pacific time of the day that we should pull the next day's data
+ROLLOVER_TIME = "20:00"
+
 # Calculate the path to the JSON file using os.path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 repo_root = os.path.abspath(os.path.join(script_dir, "../.."))
@@ -96,7 +99,7 @@ def determine_status(volunteer_count, max_volunteers):
     elif volunteer_count >= max_volunteers:
         return "Fully Open"
     # If the volunteer count is 75% of max, the grill is open
-    elif volunteer_count >= max_volunteers * 0.75:
+    elif volunteer_count >= 3:
         return "Grill open"
     else:
         return "Limited"
@@ -117,25 +120,28 @@ def extract_time_from_item(item):
 def process_signups(signups_data):
     """Process the signups data and organize by time and location."""
 
-    # Get today's date in Pacific time
+    # Get the current date in Pacific time
     pacific = pytz.timezone('US/Pacific')
-    today = datetime.datetime.now(pacific).date()
-    today_str = today.strftime("%Y-%m-%d")
+    # set the current date to today's date. If the current time is past the rollover time, set the current date to tomorrow
+    current_date = datetime.datetime.now(pacific).date()
+    if datetime.datetime.now(pacific).time() > datetime.datetime.strptime(ROLLOVER_TIME, "%H:%M").time():
+        current_date = current_date + datetime.timedelta(days=1)
+    current_str = current_date.strftime("%Y-%m-%d")
     
     # If TEST_DATE is set, use that instead
     if TEST_DATE:
         try:
-            today = datetime.datetime.strptime(TEST_DATE, "%Y-%m-%d").date()
-            today_str = TEST_DATE
-            print(f"Using test date: {today_str}")
+            current_date = datetime.datetime.strptime(TEST_DATE, "%Y-%m-%d").date()
+            current_str = TEST_DATE
+            print(f"Using test date: {current_str}")
         except ValueError:
             print(f"Invalid TEST_DATE format: {TEST_DATE}. Using today's date instead.")
     
-    print(f"Processing signups for today: {today_str}")
+    print(f"Processing signups for today: {current_str}")
     
     # Initialize data structure
     processed_data = {
-        "date": today_str,
+        "date": current_str,
         "times": []
     }
     
@@ -194,13 +200,13 @@ def process_signups(signups_data):
     # Find the target date (today or the first date after today with data)
     target_date = None
     for date in sorted_dates:
-        if date >= today:
+        if date >= current_date:
             target_date = date
             break
     
     # If no future dates are found, use today's date
     if not target_date:
-        target_date = today
+        target_date = current_date
         print(f"No future dates with data found. Using today's date: {target_date}")
     else:
         print(f"Using target date: {target_date}")

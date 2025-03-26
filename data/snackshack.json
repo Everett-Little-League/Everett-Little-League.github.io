@@ -1,13 +1,13 @@
 {
-    "date": "2025-03-24",
+    "date": "2025-03-26",
     "times": [
         {
             "time": "4:30-6:30pm",
             "snackshacks": [
                 {
                     "name": "Madison",
-                    "status": "Closed",
-                    "volunteers": "0/4",
+                    "status": "Grill open",
+                    "volunteers": "3/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 }
             ]
@@ -17,8 +17,8 @@
             "snackshacks": [
                 {
                     "name": "Madison",
-                    "status": "Closed",
-                    "volunteers": "0/4",
+                    "status": "Limited",
+                    "volunteers": "2/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 }
             ]
