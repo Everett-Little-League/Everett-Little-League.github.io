@@ -1,19 +1,36 @@
 {
-    "date": "2025-04-03",
+    "date": "2025-04-14",
     "times": [
         {
             "time": "4:30-6:30pm",
             "snackshacks": [
                 {
                     "name": "Garfield",
-                    "status": "Grill open",
-                    "volunteers": "3/4",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/0",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "name": "Madison",
+                    "status": "Limited",
+                    "volunteers": "2/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                }
+            ]
+        },
+        {
+            "time": "5:30-8:00pm",
+            "snackshacks": [
+                {
+                    "name": "Garfield",
+                    "status": "Limited",
+                    "volunteers": "1/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 },
                 {
                     "name": "Madison",
                     "status": "Need Volunteers",
-                    "volunteers": "0/4",
+                    "volunteers": "0/0",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 }
             ]
@@ -23,8 +40,8 @@
             "snackshacks": [
                 {
                     "name": "Garfield",
-                    "status": "Grill open",
-                    "volunteers": "3/4",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/0",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 },
                 {
