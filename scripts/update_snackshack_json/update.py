@@ -142,7 +142,7 @@ def process_signups(signups_data):
     # Initialize data structure
     processed_data = {
         "date": current_str,
-        "times": []
+        "locations": []
     }
     
     # Check for the correct data structure
@@ -324,64 +324,61 @@ def process_signups(signups_data):
     
     print(f"Locations with data for {target_date_str}: {', '.join(locations_with_data) if locations_with_data else 'None'}")
     
-    # Create the final data structure
-    for time_slot in sorted(time_slots):
-        time_data = {
-            "time": time_slot,
-            "snackshacks": []
-        }
-        
-        for location in locations_with_data:
-            if time_slot in signup_details and location in signup_details[time_slot]:
-                volunteer_count = signup_details[time_slot][location]["volunteer_count"]
-                max_volunteers = signup_details[time_slot][location]["max_volunteers"]
-            else:
-                volunteer_count = 0
-                max_volunteers = 0  # Default if not specified
-            
-            status = determine_status(volunteer_count, max_volunteers)
-            
-            # Create a signup URL specific to this location and time slot if possible
-            signup_url = SIGNUP_URL_TEMPLATE
-            
-            snackshack_data = {
-                "name": location,
-                "status": status,
-                "volunteers": f"{volunteer_count}/{max_volunteers}",
-                "signup": signup_url
-            }
-            
-            time_data["snackshacks"].append(snackshack_data)
-            print(f"  {time_slot} - {location}: {volunteer_count}/{max_volunteers} volunteers, Status: {status}")
-        
-        processed_data["times"].append(time_data)
+    # Within the final section of process_signups where the output data is created:
+    # Replace the current nested loop with a location-based structure
+    # First, organize data by location
+    locations_data = {}
+    for location in locations_with_data:
+        locations_data[location] = {"location": location, "times": []}
     
-    # If no time slots were found, create a default structure with only locations that have data
-    if not time_slots:
-        print(f"No time slots found for {target_date_str}. Creating default structure.")
+    # Populate times for each location
+    for time_slot, locations in signup_details.items():
+        for location, location_data in locations.items():
+            if location in locations_with_data:
+                volunteer_count = location_data["volunteer_count"]
+                max_volunteers = location_data["max_volunteers"]
+                status = determine_status(volunteer_count, max_volunteers)
+                volunteer_string = f"{volunteer_count}/{max_volunteers}"
+                
+                # Add time data to the location
+                time_data = {
+                    "time": time_slot,
+                    "status": status,
+                    "volunteers": volunteer_string,
+                    "signup": SIGNUP_URL_TEMPLATE
+                }
+                
+                locations_data[location]["times"].append(time_data)
+                print(f"  {location} - {time_slot}: {volunteer_string} volunteers, Status: {status}")
+    
+    # Add locations to the processed data
+    for location in sorted(locations_data.keys()):
+        processed_data["locations"].append(locations_data[location])
+    
+    # If no locations with data were found, create a default structure
+    if not locations_with_data:
+        print(f"No locations with data found for {target_date_str}. Creating default structure.")
+        default_locations = LOCATIONS
         default_times = ["9:00am-11:15am", "11:15am-1:30pm", "1:30pm-3:45pm", "4:30pm-6:30pm"]
-        for time_slot in default_times:
-            time_data = {
-                "time": time_slot,
-                "snackshacks": []
+        
+        for location in default_locations:
+            location_data = {
+                "location": location,
+                "times": []
             }
             
-            # If no locations have data, don't add any snackshacks
-            if not locations_with_data:
-                print(f"  {time_slot} - No locations with data")
-            else:
-                for location in locations_with_data:
-                    snackshack_data = {
-                        "name": location,
-                        "status": "Closed",
-                        "volunteers": "0/0",
-                        "signup": SIGNUP_URL_TEMPLATE
-                    }
-                    
-                    time_data["snackshacks"].append(snackshack_data)
-                    print(f"  {time_slot} - {location}: 0/0 volunteers, Status: Closed")
+            for time_slot in default_times:
+                time_data = {
+                    "time": time_slot,
+                    "status": "Need Volunteers",
+                    "volunteers": "0/0",
+                    "signup": SIGNUP_URL_TEMPLATE
+                }
+                
+                location_data["times"].append(time_data)
+                print(f"  {location} - {time_slot}: 0/0 volunteers, Status: Need Volunteers")
             
-            processed_data["times"].append(time_data)
+            processed_data["locations"].append(location_data)
     
     return processed_data
 
