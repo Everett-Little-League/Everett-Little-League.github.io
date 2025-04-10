@@ -22,12 +22,19 @@
         }
         .banner-content {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: center;
-            align-items: stretch;
-            padding: 0 10px;
+            align-items: center;
+            padding: 0;
             gap: 10px;
-            flex-wrap: wrap;
+            width: 100%;
+        }
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            width: fit-content;
+            margin: 0 auto;
+            align-items: flex-start;
         }
         .banner-date {
             font-weight: bold;
@@ -43,46 +50,52 @@
             font-weight: bold;
             margin-right: 8px;
         }
-        .time-column {
+        .location-row {
             display: flex;
             flex-direction: column;
-            min-width: 180px;
-            max-width: 200px;
+            width: auto;
+            min-width: 300px;
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
         }
-        .time-heading {
+        .location-heading {
             font-weight: bold;
             background-color: rgba(255, 255, 255, 0.15);
             padding: 4px 8px;
             width: 100%;
-            text-align: center;
+            text-align: left;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .snackshack-container {
+        .time-container {
             padding: 5px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: wrap;
             gap: 5px;
+            justify-content: flex-start;
         }
-        .snackshack-info {
+        .time-info {
             display: flex;
             flex-direction: column;
             background-color: rgba(255, 255, 255, 0.08);
             padding: 6px 8px;
             border-radius: 3px;
             font-size: 0.85em;
+            min-width: 120px;
+            flex: 0 0 auto;
+            max-width: 180px;
         }
-        .snackshack-name {
+        .time-slot {
             font-weight: bold;
             margin-bottom: 3px;
             font-size: 0.95em;
         }
-        .snackshack-status, .snackshack-volunteers {
+        .time-status, .time-volunteers {
             margin-bottom: 3px;
             display: flex;
             justify-content: space-between;
@@ -198,48 +211,61 @@
             }
             bannerHTML += `${formattedDate}</div>`;
             
-            // Add all time slots as vertical columns
-            if (data.times && data.times.length > 0) {
-                // Sort times chronologically by start time
-                data.times.sort((a, b) => {
-                    // Extract start time (everything before the dash)
-                    const aStartTime = a.time.split('-')[0].trim();
-                    const bStartTime = b.time.split('-')[0].trim();
-                    
-                    // Compare start times
-                    return new Date('1970/01/01 ' + aStartTime) - new Date('1970/01/01 ' + bStartTime);
+            // Wrap all location rows in a cards container
+            bannerHTML += `<div class="cards-container">`;
+            
+            // Add all locations as rows
+            if (data.locations && data.locations.length > 0) {
+                // Define custom sort order for locations
+                const sortedLocations = [...data.locations].sort((a, b) => {
+                    // Custom order: Madison first, Garfield second, others alphabetically
+                    if (a.location === "Madison") return -1;
+                    if (b.location === "Madison") return 1;
+                    if (a.location === "Garfield") return -1;
+                    if (b.location === "Garfield") return 1;
+                    return a.location.localeCompare(b.location);
                 });
                 
-                data.times.forEach(timeSlot => {
-                    bannerHTML += `<div class="time-column">
-                        <div class="time-heading">${timeSlot.time}</div>
-                        <div class="snackshack-container">`;
+                sortedLocations.forEach(locationData => {
+                    bannerHTML += `<div class="location-row">
+                        <div class="location-heading">${locationData.location}</div>
+                        <div class="time-container">`;
                     
-                    timeSlot.snackshacks.forEach(shack => {
-                        const volunteersParts = shack.volunteers.split('/');
+                    // Sort times chronologically
+                    const sortedTimes = [...locationData.times].sort((a, b) => {
+                        // Extract start time (everything before the dash)
+                        const aStartTime = a.time.split('-')[0].trim();
+                        const bStartTime = b.time.split('-')[0].trim();
+                        
+                        // Compare start times
+                        return new Date('1970/01/01 ' + aStartTime) - new Date('1970/01/01 ' + bStartTime);
+                    });
+                    
+                    sortedTimes.forEach(timeSlot => {
+                        const volunteersParts = timeSlot.volunteers.split('/');
                         const volunteersClass = parseInt(volunteersParts[0]) < parseInt(volunteersParts[1]) 
                             ? 'volunteers-needed' 
                             : 'volunteers-good';
                         
                         let statusClass = 'status-limited';
-                        if (shack.status.toLowerCase().includes('open')) {
+                        if (timeSlot.status.toLowerCase().includes('open')) {
                             statusClass = 'status-open';
-                        } else if (shack.status.toLowerCase().includes('closed')) {
+                        } else if (timeSlot.status.toLowerCase().includes('closed')) {
                             statusClass = 'status-closed';
                         }
                         
                         bannerHTML += `
-                            <div class="snackshack-info">
-                                <div class="snackshack-name">${shack.name}</div>
-                                <div class="snackshack-status">
+                            <div class="time-info">
+                                <div class="time-slot">${timeSlot.time}</div>
+                                <div class="time-status">
                                     <span class="label">Status:</span>
-                                    <span class="value ${statusClass}">${shack.status}</span>
+                                    <span class="value ${statusClass}">${timeSlot.status}</span>
                                 </div>
-                                <div class="snackshack-volunteers">
+                                <div class="time-volunteers">
                                     <span class="label">Volunteers:</span>
-                                    <span class="value ${volunteersClass}">${shack.volunteers}</span>
+                                    <span class="value ${volunteersClass}">${timeSlot.volunteers}</span>
                                 </div>
-                                <a href="${shack.signup}" target="_blank" class="signup-btn">Sign Up</a>
+                                <a href="${timeSlot.signup}" target="_blank" class="signup-btn">Sign Up</a>
                             </div>
                         `;
                     });
@@ -249,6 +275,9 @@
             } else {
                 bannerHTML += '<div>No schedule information available.</div>';
             }
+            
+            // Close the cards container
+            bannerHTML += `</div>`;
             
             bannerContent.innerHTML = bannerHTML;
         }
