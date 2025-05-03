@@ -1,19 +1,54 @@
 {
-    "date": "2025-05-02",
+    "date": "2025-05-03",
     "locations": [
+        {
+            "location": "Garfield",
+            "times": [
+                {
+                    "time": "1:15pm-3:30pm",
+                    "status": "Grill open",
+                    "volunteers": "3/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "time": "3:15pm-close",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "time": "11:00am-1:30pm",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                }
+            ]
+        },
         {
             "location": "Madison",
             "times": [
                 {
                     "time": "4:30-6:30pm",
-                    "status": "Limited",
-                    "volunteers": "2/4",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 },
                 {
-                    "time": "6:15-8:30pm",
-                    "status": "Limited",
-                    "volunteers": "1/4",
+                    "time": "1:15pm-close",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "time": "9:00-11:30am",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "time": "11:15am-1:30pm",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 }
             ]
