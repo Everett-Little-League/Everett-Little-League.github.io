@@ -1,11 +1,23 @@
 {
-    "date": "2025-05-29",
+    "date": "2025-05-31",
     "locations": [
         {
             "location": "Garfield",
             "times": [
                 {
-                    "time": "4:30-6:30pm",
+                    "time": "1:15pm- 3:30pm",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "time": "2:30pm-close",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+                },
+                {
+                    "time": "11:45am-2:30pm",
                     "status": "Need Volunteers",
                     "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
@@ -16,13 +28,13 @@
             "location": "Madison",
             "times": [
                 {
-                    "time": "4:30-6:30pm",
-                    "status": "Grill open",
-                    "volunteers": "3/4",
+                    "time": "1:15pm-close",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 },
                 {
-                    "time": "6:15-8:30pm",
+                    "time": "11:15am-1:30pm",
                     "status": "Need Volunteers",
                     "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
