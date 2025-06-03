@@ -5,85 +5,9 @@
             "location": "Madison",
             "times": [
                 {
-                    "time": "9:00am-11:15am",
+                    "time": "4:30-6:30pm",
                     "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "11:15am-1:30pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "1:30pm-3:45pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "4:30pm-6:30pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                }
-            ]
-        },
-        {
-            "location": "Garfield",
-            "times": [
-                {
-                    "time": "9:00am-11:15am",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "11:15am-1:30pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "1:30pm-3:45pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "4:30pm-6:30pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                }
-            ]
-        },
-        {
-            "location": "Minor's Classic",
-            "times": [
-                {
-                    "time": "9:00am-11:15am",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "11:15am-1:30pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "1:30pm-3:45pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
-                },
-                {
-                    "time": "4:30pm-6:30pm",
-                    "status": "Need Volunteers",
-                    "volunteers": "0/0",
+                    "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
                 }
             ]
