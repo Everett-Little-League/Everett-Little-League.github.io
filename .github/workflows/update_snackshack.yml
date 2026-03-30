@@ -18,7 +18,7 @@ jobs:
   update-snackshack:
     runs-on: ubuntu-latest
     env:
-      SIGNUP_ID: ${{ secrets.SIGNUPGENIUS_SIGNUP_ID }}
+      SIGNUP_ID: ${{ vars.SIGNUPGENIUS_SIGNUP_ID }}
       API_KEY: ${{ secrets.SIGNUPGENIUS_API_KEY }}
       SIGNUP_URL: ${{ vars.SIGNUPGENIUS_SIGNUP_URL }}
     

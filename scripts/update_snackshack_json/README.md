@@ -43,11 +43,11 @@ This will:
 
 The scheduled workflow uses:
 
-- `SIGNUPGENIUS_SIGNUP_ID` as a GitHub Actions secret
+- `SIGNUPGENIUS_SIGNUP_ID` as a GitHub Actions repository variable
 - `SIGNUPGENIUS_API_KEY` as a GitHub Actions secret
 - `SIGNUPGENIUS_SIGNUP_URL` as a GitHub Actions repository variable
 
-That means rolling over to a new season only requires updating the repository variable for the public signup URL instead of editing code.
+That means rolling over to a new season only requires updating repository variables instead of editing code. Only the API key needs to remain secret.
 
 ## SignUpGenius response
 
