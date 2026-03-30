@@ -118,6 +118,11 @@
         .signup-btn:hover {
             background-image: linear-gradient(to bottom, #ffb84d, #ff9900);
         }
+        .signup-btn-disabled {
+            opacity: 0.7;
+            cursor: default;
+            pointer-events: none;
+        }
         .status-limited {
             color: #ffcc00;
         }
@@ -253,6 +258,10 @@
                         } else if (timeSlot.status.toLowerCase().includes('closed')) {
                             statusClass = 'status-closed';
                         }
+
+                        const signupButton = timeSlot.signup
+                            ? `<a href="${timeSlot.signup}" target="_blank" rel="noopener noreferrer" class="signup-btn">Sign Up</a>`
+                            : `<span class="signup-btn signup-btn-disabled">Sign Up Unavailable</span>`;
                         
                         bannerHTML += `
                             <div class="time-info">
@@ -265,7 +274,7 @@
                                     <span class="label">Volunteers:</span>
                                     <span class="value ${volunteersClass}">${timeSlot.volunteers}</span>
                                 </div>
-                                <a href="${timeSlot.signup}" target="_blank" class="signup-btn">Sign Up</a>
+                                ${signupButton}
                             </div>
                         `;
                     });

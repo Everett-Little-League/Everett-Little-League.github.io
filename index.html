@@ -80,9 +80,13 @@
         </section>
 
         <footer>
-            <p>&copy; 2024 Everett Little League. All rights reserved.</p>
-            <p><a href="https://github.com/Everett-Little-League" target="_blank">GitHub Organization</a></p>
+            <p>&copy; <span id="current-year"></span> Everett Little League. All rights reserved.</p>
+            <p><a href="https://github.com/Everett-Little-League" target="_blank" rel="noopener noreferrer">GitHub Organization</a></p>
         </footer>
     </div>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>

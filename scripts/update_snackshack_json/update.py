@@ -14,54 +14,70 @@ import re
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from the script directory for local runs
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent.parent
+ENV_FILE_PATH = SCRIPT_DIR / ".env"
+load_dotenv(ENV_FILE_PATH)
 
 # SignUpGenius API credentials
-SIGNUP_ID = os.getenv("SIGNUP_ID")
-API_KEY = os.getenv("API_KEY")
+SIGNUP_ID = os.getenv("SIGNUP_ID", "").strip()
+API_KEY = os.getenv("API_KEY", "").strip()
+SIGNUP_URL = os.getenv("SIGNUP_URL", "").strip()
 # Test date for debugging
-TEST_DATE = os.getenv("TEST_DATE")
+TEST_DATE = os.getenv("TEST_DATE", "").strip()
 # Debug mode
-DEBUG = os.getenv("DEBUG")
-
-# Check the required environment variables are set
-if not SIGNUP_ID or not API_KEY:
-    print("Error: Both SIGNUP_ID and API_KEY environment variables must be set")
-    print("Create a .env file with these variables or set them in your environment")
-    sys.exit(1)
+DEBUG = os.getenv("DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
 
 # Constants
-BASE_URL = "https://api.signupgenius.com/v2/k"  # Removed trailing slash
-REPORT_ENDPOINT = f"/signups/report/all/{SIGNUP_ID}/"
+BASE_URL = "https://api.signupgenius.com/v2/k"
 API_DOCS = "https://developer.signupgenius.com/developer/keybaseddocs"
+REQUEST_TIMEOUT_SECONDS = 30
 
 # The Pacific time of the day that we should pull the next day's data
 ROLLOVER_TIME = "20:00"
 
-# Calculate the path to the JSON file using os.path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-repo_root = os.path.abspath(os.path.join(script_dir, "../.."))
-JSON_FILE_PATH = Path(os.path.join(repo_root, "data", "snackshack.json"))
-print(f"JSON file path: {JSON_FILE_PATH}")
+# Calculate the path to the JSON file
+JSON_FILE_PATH = REPO_ROOT / "data" / "snackshack.json"
 
 # Snack shack locations
 LOCATIONS = ["Madison", "Garfield", "Minor's Classic"]
 
-# Signup URL template
-SIGNUP_URL_TEMPLATE = "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-54832801-evll#/"
+def validate_config():
+    """Ensure required environment variables are present."""
+    missing = [
+        name for name, value in (
+            ("SIGNUP_ID", SIGNUP_ID),
+            ("API_KEY", API_KEY),
+            ("SIGNUP_URL", SIGNUP_URL),
+        ) if not value
+    ]
+
+    if not missing:
+        return True
+
+    print(
+        "Error: Missing required environment variables: "
+        + ", ".join(missing)
+    )
+    print(
+        "Set them in scripts/update_snackshack_json/.env for local runs or provide "
+        "them through GitHub Actions. The public signup link should come from the "
+        "SIGNUPGENIUS_SIGNUP_URL repository variable."
+    )
+    return False
 
 def get_signupgenius_data():
     """Fetch signup data from SignUpGenius API."""
     print(f"Fetching data from SignUpGenius API for signup ID: {SIGNUP_ID}")
     
     try:
-        # Fix URL construction to avoid double slashes
-        url = f"{BASE_URL}{REPORT_ENDPOINT}?user_key={API_KEY}"
+        report_endpoint = f"/signups/report/all/{SIGNUP_ID}/"
+        url = f"{BASE_URL}{report_endpoint}?user_key={API_KEY}"
         # print the url, hide the api key
         print(f"API URL: {url.replace(API_KEY, '********')}")
         
-        response = requests.get(url)
+        response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
         response.raise_for_status()  # Raise an exception for 4XX/5XX responses
         
         print(f"Successfully retrieved data from SignUpGenius API")
@@ -98,7 +114,7 @@ def determine_status(volunteer_count, max_volunteers):
     # If the volunteer count is at least max_volunteers, the grill is fully open
     elif volunteer_count >= max_volunteers:
         return "Fully Open"
-    # If the volunteer count is 75% of max, the grill is open
+    # Three volunteers is enough to open the grill for the current schedule format
     elif volunteer_count >= 3:
         return "Grill open"
     else:
@@ -115,6 +131,25 @@ def extract_time_from_item(item):
             print(f"  - Extracted time range: {time_range}")
         return time_range
     
+    return None
+
+def extract_signup_date(signup, timezone):
+    """Extract the signup date in Pacific time from a signup record."""
+    if signup.get("startdatestring"):
+        date_parts = signup["startdatestring"].split(" ")
+        if date_parts:
+            try:
+                return datetime.datetime.strptime(date_parts[0], "%Y-%m-%d").date()
+            except ValueError:
+                return None
+
+    if signup.get("startdate"):
+        try:
+            timestamp = int(signup["startdate"])
+            return datetime.datetime.fromtimestamp(timestamp, tz=timezone).date()
+        except (ValueError, TypeError, OSError):
+            return None
+
     return None
 
 def process_signups(signups_data):
@@ -172,27 +207,9 @@ def process_signups(signups_data):
     # Find all available dates in the signups data
     available_dates = set()
     for signup in signups:
-        # Try to extract date from various possible fields
-        signup_date_str = None
-        if 'startdatestring' in signup and signup['startdatestring']:
-            # Extract just the date part from the string (e.g., "2025-04-02 07:00 GMT")
-            date_parts = signup['startdatestring'].split(' ')
-            if date_parts:
-                signup_date_str = date_parts[0]
-        elif 'startdate' in signup and signup['startdate']:
-            # Convert timestamp to date string if needed
-            try:
-                timestamp = int(signup['startdate'])
-                signup_date_str = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d")
-            except (ValueError, TypeError):
-                pass
-        
-        if signup_date_str:
-            try:
-                signup_date = datetime.datetime.strptime(signup_date_str, "%Y-%m-%d").date()
-                available_dates.add(signup_date)
-            except ValueError:
-                pass
+        signup_date = extract_signup_date(signup, pacific)
+        if signup_date:
+            available_dates.add(signup_date)
     
     # Sort the available dates
     sorted_dates = sorted(available_dates)
@@ -215,10 +232,8 @@ def process_signups(signups_data):
     target_date_str = target_date.strftime("%Y-%m-%d")
     processed_data["date"] = target_date_str
     
-    # Collect all time slots and organize signups by time and location
-    time_slots = set()
+    # Organize signups by time and location
     signup_details = {}
-    max_volunteers_by_slot = {}
     
     # Track which locations have data for the target date
     locations_with_data = set()
@@ -235,27 +250,14 @@ def process_signups(signups_data):
             print(f"  - Status: {signup.get('status', '')}")
             print(f"  - Quantity: {signup.get('myqty', '')}")
         
-        # Try to extract date from various possible fields
-        signup_date_str = None
-        if 'startdatestring' in signup and signup['startdatestring']:
-            # Extract just the date part from the string (e.g., "2025-04-02 07:00 GMT")
-            date_parts = signup['startdatestring'].split(' ')
-            if date_parts:
-                signup_date_str = date_parts[0]
-        elif 'startdate' in signup and signup['startdate']:
-            # Convert timestamp to date string if needed
-            try:
-                timestamp = int(signup['startdate'])
-                signup_date_str = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d")
-            except (ValueError, TypeError):
-                pass
-        
-        if not signup_date_str:
+        signup_date = extract_signup_date(signup, pacific)
+
+        if not signup_date:
             print(f"  - Could not determine date for slotitemid {signup.get('slotitemid', '')}, skipping. Go to {API_DOCS} for more information.")
             continue
 
         if DEBUG:
-            print(f"  - Extracted date: {signup_date_str}")
+            print(f"  - Extracted date: {signup_date}")
         
         # Extract location and time from the item field
         item = signup.get('item', '')
@@ -280,34 +282,26 @@ def process_signups(signups_data):
             
         # Check if the signup is for the target date
         try:
-            signup_date = datetime.datetime.strptime(signup_date_str, "%Y-%m-%d").date()
             if signup_date != target_date:
                 if DEBUG:
                     print(f"  - Signup date {signup_date} does not match target date {target_date}, skipping. Go to {API_DOCS} for more information.")
                 continue
             
-            # Add this time slot to our set of time slots
-            time_slots.add(time_slot)
-            
             # Initialize the data structure for this time slot and location if needed
             if time_slot not in signup_details:
                 signup_details[time_slot] = {}
-                max_volunteers_by_slot[time_slot] = {}
             
             if location not in signup_details[time_slot]:
                 signup_details[time_slot][location] = {
                     "volunteer_count": 0,
                     "max_volunteers": 0  # Will be calculated as sum of all myqty values
                 }
-                max_volunteers_by_slot[time_slot][location] = 0
             
             # Get the quantity for this signup
             qty = int(signup.get("myqty", 0))
             
             # Add to max_volunteers (total of all myqty values)
             signup_details[time_slot][location]["max_volunteers"] += qty
-            max_volunteers_by_slot[time_slot][location] += qty
-            
             # Only count as volunteer if firstname is not empty
             if signup.get("firstname", "").strip():
                 signup_details[time_slot][location]["volunteer_count"] += qty
@@ -324,9 +318,7 @@ def process_signups(signups_data):
     
     print(f"Locations with data for {target_date_str}: {', '.join(locations_with_data) if locations_with_data else 'None'}")
     
-    # Within the final section of process_signups where the output data is created:
-    # Replace the current nested loop with a location-based structure
-    # First, organize data by location
+    # Build the final output grouped by location
     locations_data = {}
     for location in locations_with_data:
         locations_data[location] = {"location": location, "times": []}
@@ -345,7 +337,7 @@ def process_signups(signups_data):
                     "time": time_slot,
                     "status": status,
                     "volunteers": volunteer_string,
-                    "signup": SIGNUP_URL_TEMPLATE
+                    "signup": SIGNUP_URL
                 }
                 
                 locations_data[location]["times"].append(time_data)
@@ -372,7 +364,7 @@ def process_signups(signups_data):
                     "time": time_slot,
                     "status": "Need Volunteers",
                     "volunteers": "0/0",
-                    "signup": SIGNUP_URL_TEMPLATE
+                    "signup": SIGNUP_URL
                 }
                 
                 location_data["times"].append(time_data)
@@ -390,19 +382,18 @@ def update_json_file(data):
     # Check if the file exists and read its current contents
     if JSON_FILE_PATH.exists():
         try:
-            with open(JSON_FILE_PATH, 'r') as f:
-                current_data = json.load(f)
+            with open(JSON_FILE_PATH, 'r', encoding='utf-8') as f:
+                json.load(f)
                 print(f"Successfully read existing data from {JSON_FILE_PATH}")
         except json.JSONDecodeError:
             print(f"Warning: Existing file {JSON_FILE_PATH} contains invalid JSON. It will be overwritten.")
-            current_data = None
     else:
         print(f"File {JSON_FILE_PATH} does not exist. Creating a new file.")
-        current_data = None
     
     # Write the data to the file
-    with open(JSON_FILE_PATH, 'w') as f:
+    with open(JSON_FILE_PATH, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
+        f.write("\n")
     
     print(f"Updated {JSON_FILE_PATH} with new data")
 
@@ -410,6 +401,10 @@ def main():
     """Main function to update the snackshack.json file."""
     try:
         print("Starting snackshack.json update process")
+        print(f"JSON file path: {JSON_FILE_PATH}")
+
+        if not validate_config():
+            return 1
         
         # Get data from SignUpGenius
         signups_data = get_signupgenius_data()
