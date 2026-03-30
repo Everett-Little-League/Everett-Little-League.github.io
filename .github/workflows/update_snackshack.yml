@@ -7,9 +7,20 @@ on:
   # Allow manual triggering
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: update-snackshack
+  cancel-in-progress: true
+
 jobs:
   update-snackshack:
     runs-on: ubuntu-latest
+    env:
+      SIGNUP_ID: ${{ secrets.SIGNUPGENIUS_SIGNUP_ID }}
+      API_KEY: ${{ secrets.SIGNUPGENIUS_API_KEY }}
+      SIGNUP_URL: ${{ vars.SIGNUPGENIUS_SIGNUP_URL }}
     
     steps:
       - name: Checkout repository
@@ -27,12 +38,7 @@ jobs:
           pip install -r scripts/update_snackshack_json/requirements.txt
       
       - name: Run update script
-        env:
-          SIGNUP_ID: ${{ secrets.SIGNUPGENIUS_SIGNUP_ID }}
-          API_KEY: ${{ secrets.SIGNUPGENIUS_API_KEY }}
-        run: |
-          cd scripts/update_snackshack_json
-          python update.py
+        run: python scripts/update_snackshack_json/update.py
       
       - name: Check for changes
         id: check_changes

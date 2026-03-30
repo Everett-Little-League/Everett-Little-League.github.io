@@ -19,11 +19,13 @@ This script updates the `data/snackshack.json` file with data from SignUpGenius.
    ```
    SIGNUP_ID=your_signup_id
    API_KEY=your_user_key
+   SIGNUP_URL=https://www.signupgenius.com/go/your-public-signup-link#/
    ```
 
    You can obtain these credentials from your SignUpGenius account:
    - The `SIGNUP_ID` is the unique identifier for your signup form
    - The `API_KEY` is your API key from SignUpGenius
+   - The `SIGNUP_URL` is the public SignUpGenius page used by the banner's "Sign Up" button
 
 ## Usage
 
@@ -36,6 +38,16 @@ This will:
 1. Fetch data from SignUpGenius for today's date (Pacific time)
 2. Process the data to determine the status of each snack shack location
 3. Update the `data/snackshack.json` file with the current information
+
+## GitHub Actions configuration
+
+The scheduled workflow uses:
+
+- `SIGNUPGENIUS_SIGNUP_ID` as a GitHub Actions secret
+- `SIGNUPGENIUS_API_KEY` as a GitHub Actions secret
+- `SIGNUPGENIUS_SIGNUP_URL` as a GitHub Actions repository variable
+
+That means rolling over to a new season only requires updating the repository variable for the public signup URL instead of editing code.
 
 ## SignUpGenius response
 
@@ -99,25 +111,18 @@ The script maintains the following JSON structure:
 ```json
 {
     "date": "YYYY-MM-DD",
-    "times": [
+    "locations": [
         {
-            "time": "10:00 AM",
-            "snackshacks": [
+            "location": "Madison",
+            "times": [
                 {
-                    "name": "Madison",
+                    "time": "10:00 AM-12:00 PM",
                     "status": "Grill open",
                     "volunteers": "3/4",
-                    "signup": "https://signup.com/go/your_signup_id"
-                },
-                {
-                    "name": "Garfield",
-                    "status": "Limited",
-                    "volunteers": "1/4",
-                    "signup": "https://signup.com/go/your_signup_id"
+                    "signup": "https://www.signupgenius.com/go/your-public-signup-link#/"
                 }
             ]
-        },
-        // Additional time slots...
+        }
     ]
 }
 ```
@@ -132,4 +137,4 @@ The status of each snack shack is determined by the number of volunteers:
 
 ## Automation
 
-This script can be scheduled to run every 15 minutes using github actions to keep the snack shack information up to date.
+This script is scheduled to run every 15 minutes using GitHub Actions to keep the snack shack information up to date.

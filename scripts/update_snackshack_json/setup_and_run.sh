@@ -25,6 +25,7 @@ if [ ! -f ".env" ]; then
     echo "Creating sample .env file..."
     echo "SIGNUP_ID=your_signup_id" > .env
     echo "API_KEY=your_user_key" >> .env
+    echo "SIGNUP_URL=https://www.signupgenius.com/go/your-public-signup-link#/" >> .env
     echo "Please edit the .env file with your actual SignUpGenius credentials."
     exit 1
 fi
@@ -36,4 +37,4 @@ python update.py
 # Deactivate virtual environment
 deactivate
 
-echo "Done!" 
+echo "Done!"
