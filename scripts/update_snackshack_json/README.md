@@ -39,6 +39,9 @@ This will:
 2. Process the data to determine the status of each snack shack location
 3. Update the `data/snackshack.json` file with the current information
 
+The updater uses the documented SignUpGenius v2 key-based report endpoint and now sends
+`Accept: application/json` on API requests.
+
 ## GitHub Actions configuration
 
 The scheduled workflow uses:
@@ -103,6 +106,18 @@ The SignUpGenius API returns a JSON object with the following structure:
   "success": false
 }
 ```
+
+The updater supports both response shapes seen in production:
+- `data.signups` (array)
+- `data.signup` (array or single object)
+
+## API resiliency behavior
+
+To handle intermittent upstream API instability, the updater:
+- Retries with exponential backoff for transient 5xx responses
+- Retries when the API returns an empty body or non-JSON payload
+- Logs redacted diagnostics (HTTP status, content type, and a short body snippet) for failed attempts
+- Preserves the last known good `data/snackshack.json` and exits successfully when upstream errors persist, so the scheduled workflow does not fail solely due to SignUpGenius outages
 
 ## data/snackshack.json JSON Structure
 
