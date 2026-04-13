@@ -13,6 +13,7 @@ This repository is the static site for Everett Little League code projects.
 The Snack Shack Signup Genius Banner is a simple banner that displays the volunteer status for our snack shacks and a link to the Signup Genius registration page.
 
 The banner is displayed on the top of the page and is a fixed position. It is updated every 15 minutes using GitHub Actions and the SignUpGenius API.
+If SignUpGenius has transient upstream errors, the updater preserves the last known good `data/snackshack.json` so scheduled runs remain stable.
 
 The public "Sign Up" button link is driven by the GitHub Actions repository variable `SIGNUPGENIUS_SIGNUP_URL`, so the league can switch seasons without changing code.
 

@@ -11,6 +11,7 @@ import datetime
 import pytz
 import sys
 import re
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -33,6 +34,8 @@ DEBUG = os.getenv("DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
 BASE_URL = "https://api.signupgenius.com/v2/k"
 API_DOCS = "https://developer.signupgenius.com/developer/keybaseddocs"
 REQUEST_TIMEOUT_SECONDS = 30
+MAX_FETCH_ATTEMPTS = 4
+INITIAL_RETRY_DELAY_SECONDS = 2
 
 # The Pacific time of the day that we should pull the next day's data
 ROLLOVER_TIME = "20:00"
@@ -42,6 +45,43 @@ JSON_FILE_PATH = REPO_ROOT / "data" / "snackshack.json"
 
 # Snack shack locations
 LOCATIONS = ["Madison", "Garfield", "Minor's Classic"]
+
+
+class UpstreamDataUnavailable(Exception):
+    """Raised when SignUpGenius data cannot be reliably retrieved."""
+
+
+def redact_text(value):
+    """Redact sensitive values from logs."""
+    if not value:
+        return ""
+
+    redacted = str(value)
+    sensitive_values = [API_KEY, SIGNUP_ID]
+    for sensitive in sensitive_values:
+        if sensitive:
+            redacted = redacted.replace(sensitive, "********")
+    return redacted
+
+
+def body_snippet(text, limit=300):
+    """Return a trimmed and redacted one-line snippet for logging."""
+    cleaned = " ".join((text or "").split())
+    if len(cleaned) > limit:
+        cleaned = f"{cleaned[:limit]}..."
+    return redact_text(cleaned)
+
+
+def log_failure_details(response, reason):
+    """Log useful but redacted response diagnostics."""
+    status = response.status_code if response is not None else "n/a"
+    content_type = response.headers.get("Content-Type", "unknown") if response is not None else "unknown"
+    response_text = response.text if response is not None else ""
+    snippet = body_snippet(response_text)
+    print(
+        f"{reason}. HTTP status={status}, content-type={content_type}, "
+        f"body-snippet='{snippet}'"
+    )
 
 def validate_config():
     """Ensure required environment variables are present."""
@@ -70,19 +110,70 @@ def validate_config():
 def get_signupgenius_data():
     """Fetch signup data from SignUpGenius API."""
     print(f"Fetching data from SignUpGenius API for signup ID: {SIGNUP_ID}")
-    
-    try:
-        report_endpoint = f"/signups/report/all/{SIGNUP_ID}/"
-        url = f"{BASE_URL}{report_endpoint}?user_key={API_KEY}"
-        # print the url, hide the api key
-        print(f"API URL: {url.replace(API_KEY, '********')}")
-        
-        response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
-        response.raise_for_status()  # Raise an exception for 4XX/5XX responses
-        
-        print(f"Successfully retrieved data from SignUpGenius API")
-        data = response.json()
-        
+
+    report_endpoint = f"/signups/report/all/{SIGNUP_ID}/"
+    url = f"{BASE_URL}{report_endpoint}?user_key={API_KEY}"
+    headers = {"Accept": "application/json"}
+    print(f"API URL: {url.replace(API_KEY, '********')}")
+
+    retry_delay_seconds = INITIAL_RETRY_DELAY_SECONDS
+    for attempt in range(1, MAX_FETCH_ATTEMPTS + 1):
+        try:
+            response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT_SECONDS)
+        except requests.exceptions.RequestException as e:
+            print(
+                f"Attempt {attempt}/{MAX_FETCH_ATTEMPTS}: network error while fetching "
+                f"SignUpGenius API data: {e}"
+            )
+            if attempt == MAX_FETCH_ATTEMPTS:
+                raise UpstreamDataUnavailable("Network failure calling SignUpGenius API") from e
+            print(f"Retrying in {retry_delay_seconds} seconds")
+            time.sleep(retry_delay_seconds)
+            retry_delay_seconds *= 2
+            continue
+
+        if 500 <= response.status_code <= 599:
+            print(f"Attempt {attempt}/{MAX_FETCH_ATTEMPTS}: transient upstream 5xx response")
+            log_failure_details(response, "SignUpGenius returned a transient 5xx response")
+            if attempt == MAX_FETCH_ATTEMPTS:
+                raise UpstreamDataUnavailable(
+                    f"SignUpGenius API returned repeated 5xx responses ({response.status_code})"
+                )
+            print(f"Retrying in {retry_delay_seconds} seconds")
+            time.sleep(retry_delay_seconds)
+            retry_delay_seconds *= 2
+            continue
+
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            log_failure_details(response, "SignUpGenius returned a non-retryable HTTP error")
+            raise
+
+        if not response.text or not response.text.strip():
+            print(f"Attempt {attempt}/{MAX_FETCH_ATTEMPTS}: empty response body from SignUpGenius")
+            log_failure_details(response, "SignUpGenius returned an empty response body")
+            if attempt == MAX_FETCH_ATTEMPTS:
+                raise UpstreamDataUnavailable("SignUpGenius returned repeated empty responses")
+            print(f"Retrying in {retry_delay_seconds} seconds")
+            time.sleep(retry_delay_seconds)
+            retry_delay_seconds *= 2
+            continue
+
+        try:
+            data = response.json()
+        except json.JSONDecodeError as e:
+            print(f"Attempt {attempt}/{MAX_FETCH_ATTEMPTS}: non-JSON response from SignUpGenius")
+            log_failure_details(response, "SignUpGenius returned non-JSON response data")
+            if attempt == MAX_FETCH_ATTEMPTS:
+                raise UpstreamDataUnavailable("SignUpGenius returned repeated non-JSON responses") from e
+            print(f"Retrying in {retry_delay_seconds} seconds")
+            time.sleep(retry_delay_seconds)
+            retry_delay_seconds *= 2
+            continue
+
+        print("Successfully retrieved data from SignUpGenius API")
+
         # Debug: Print the structure of the response
         if DEBUG:
             print("API Response Structure:")
@@ -101,11 +192,10 @@ def get_signupgenius_data():
                         print("  - Single signup object found")
             else:
                 print(f"  - Response keys: {list(data.keys())}")
-        
+
         return data
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching data from SignUpGenius API: {e}")
-        raise
+
+    raise UpstreamDataUnavailable("Failed to retrieve SignUpGenius data after retries")
 
 def determine_status(volunteer_count, max_volunteers):
     """Determine the status based on volunteer count."""
@@ -397,6 +487,22 @@ def update_json_file(data):
     
     print(f"Updated {JSON_FILE_PATH} with new data")
 
+
+def has_last_known_good_json():
+    """Return True when data/snackshack.json exists and parses as JSON."""
+    if not JSON_FILE_PATH.exists():
+        print(f"No fallback file available at {JSON_FILE_PATH}")
+        return False
+
+    try:
+        with open(JSON_FILE_PATH, 'r', encoding='utf-8') as f:
+            json.load(f)
+        print(f"Preserving last known good data in {JSON_FILE_PATH}")
+        return True
+    except json.JSONDecodeError:
+        print(f"Fallback file exists but is invalid JSON: {JSON_FILE_PATH}")
+        return False
+
 def main():
     """Main function to update the snackshack.json file."""
     try:
@@ -406,8 +512,16 @@ def main():
         if not validate_config():
             return 1
         
-        # Get data from SignUpGenius
-        signups_data = get_signupgenius_data()
+        try:
+            # Get data from SignUpGenius
+            signups_data = get_signupgenius_data()
+        except UpstreamDataUnavailable as e:
+            print(f"Warning: {e}")
+            if has_last_known_good_json():
+                print("Completed with fallback data due to SignUpGenius upstream instability")
+                return 0
+            print("No valid fallback data available; failing update")
+            return 1
         
         # Process the data
         processed_data = process_signups(signups_data)
