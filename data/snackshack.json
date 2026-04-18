@@ -1,13 +1,42 @@
 {
-    "date": "2026-04-17",
+    "date": "2026-04-18",
     "locations": [
+        {
+            "location": "Garfield",
+            "times": [
+                {
+                    "time": "9:00am-12:00pm",
+                    "status": "Fully Open",
+                    "volunteers": "4/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
+                },
+                {
+                    "time": "11:15am-1:45pm",
+                    "status": "Fully Open",
+                    "volunteers": "4/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
+                },
+                {
+                    "time": "1:30pm-4:00pm",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
+                }
+            ]
+        },
         {
             "location": "Madison",
             "times": [
                 {
-                    "time": "5:30 - 8:00",
-                    "status": "Fully Open",
-                    "volunteers": "4/4",
+                    "time": "2:30 - 5:00",
+                    "status": "Limited",
+                    "volunteers": "2/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
+                },
+                {
+                    "time": "4:30 - 7:00",
+                    "status": "Limited",
+                    "volunteers": "1/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
                 }
             ]
