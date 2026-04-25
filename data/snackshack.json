@@ -5,15 +5,15 @@
             "location": "Garfield",
             "times": [
                 {
-                    "time": "11:30am-2:30pm",
-                    "status": "Grill open",
-                    "volunteers": "3/4",
-                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
-                },
-                {
                     "time": "9:00am-11:30am",
                     "status": "Fully Open",
                     "volunteers": "4/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
+                },
+                {
+                    "time": "11:30am-2:30pm",
+                    "status": "Grill open",
+                    "volunteers": "3/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
                 },
                 {
