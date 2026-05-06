@@ -1,13 +1,13 @@
 {
-    "date": "2026-05-05",
+    "date": "2026-05-06",
     "locations": [
         {
             "location": "Garfield",
             "times": [
                 {
                     "time": "5:30 - 8:00",
-                    "status": "Limited",
-                    "volunteers": "1/4",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
                 }
             ]
