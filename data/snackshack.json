@@ -1,13 +1,24 @@
 {
-    "date": "2026-05-22",
+    "date": "2026-05-26",
     "locations": [
+        {
+            "location": "Garfield",
+            "times": [
+                {
+                    "time": "5:30 - 8:00",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
+                    "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
+                }
+            ]
+        },
         {
             "location": "Madison",
             "times": [
                 {
                     "time": "5:30 - 8:00",
-                    "status": "Limited",
-                    "volunteers": "1/4",
+                    "status": "Need Volunteers",
+                    "volunteers": "0/4",
                     "signup": "https://www.signupgenius.com/go/5080C44AEAB2EAAFF2-62435346-evll#/"
                 }
             ]
